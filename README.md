@@ -22,24 +22,24 @@ The launcher sets `DISABLE_AUTOUPDATER=1`, so `claude46` stays pinned. Your norm
 
 ## Quick Install
 
-Run directly from GitHub:
+Run the stable installer directly from GitHub:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/main/install-claude46.sh | bash
+curl -fsSL https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/v0.1.0/install-claude46.sh | bash
 ```
 
 If you prefer to inspect the script before running it:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/main/install-claude46.sh -o install-claude46.sh
+curl -fsSL https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/v0.1.0/install-claude46.sh -o install-claude46.sh
 less install-claude46.sh
 bash install-claude46.sh
 ```
 
-After the first tagged release, prefer the versioned URL for a stable installer:
+To run the latest version from `main` instead:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/v0.1.0/install-claude46.sh | bash
+curl -fsSL https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/main/install-claude46.sh | bash
 ```
 
 ## Local Install
