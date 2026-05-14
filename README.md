@@ -1,14 +1,14 @@
-# Claude Code Helpers
+# claude46 — Pin Claude Code to Claude Opus 4.6 (with 1M context)
 
-Small helper scripts for installing alternate Claude Code launchers alongside the normal `claude` command.
+Install a pinned Claude Code launcher named `claude46` to keep using **Claude Opus 4.6** (`claude-opus-4-6[1m]`) after Claude Code updated its default to Opus 4.7. Your regular `claude` command continues to auto-update normally.
 
 This project is not affiliated with Anthropic. Claude and Claude Code are Anthropic products/trademarks. This repository only provides helper scripts for installing and launching Claude Code.
 
-## `claude46`
+## Pin Claude Code to Opus 4.6 with `claude46`
 
 `install-claude46.sh` installs a pinned Claude Code launcher named `claude46`.
 
-It is intended for running Claude Code before the Opus 4.7 release while leaving your regular `claude` installation free to update normally.
+It is intended for users who want to keep running Claude Opus 4.6 after Opus 4.7 became the default, while leaving the regular `claude` command free to auto-update.
 
 The script installs:
 
@@ -20,7 +20,7 @@ The script installs:
 
 The launcher sets `DISABLE_AUTOUPDATER=1`, so `claude46` stays pinned. Your normal `claude` command is not modified.
 
-## Quick Install
+## Install claude46 to Keep Using Claude Opus 4.6
 
 Run the stable installer directly from GitHub:
 
@@ -57,6 +57,8 @@ If `~/.local/bin` was not already on your `PATH`, open a new terminal after inst
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+The installer appends that `export PATH=...` line to `~/.zshrc` only. If your shell is bash (common on Linux), add the same line to `~/.bashrc` or `~/.bash_profile` yourself.
+
 ## Use
 
 Start the pinned Claude Code launcher:
@@ -77,7 +79,7 @@ Your regular Claude Code installation remains available separately:
 claude
 ```
 
-## Override The Model
+## Default Model: `claude-opus-4-6[1m]` (override per run)
 
 `claude46` defaults to `claude-opus-4-6[1m]`.
 
@@ -121,6 +123,28 @@ export PATH="$HOME/.local/bin:$PATH"
 - `curl`
 - `bash`
 - `~/.local/bin` on your `PATH`
+
+## FAQ
+
+### How do I keep using Claude Opus 4.6 after Claude Code updated to Opus 4.7?
+
+Install the `claude46` launcher from this repo and run `claude46` instead of `claude`. It installs Claude Code `2.1.110` and defaults the model to `claude-opus-4-6[1m]`.
+
+### How do I downgrade Claude Code to Opus 4.6?
+
+You don't have to downgrade your main install. `claude46` is a separate pinned binary at version 2.1.110 with auto-update disabled, installed alongside your normal `claude` command.
+
+### Does this support the Opus 4.6 1M context window?
+
+The launcher sets the default model ID to `claude-opus-4-6[1m]`, which requests the 1M context variant. Whether your account actually gets the 1M window depends on your Anthropic plan/tier.
+
+### Will this break my normal `claude` install?
+
+No. `claude46` does not replace your normal `claude` binary — they live at different paths, `claude` keeps updating, and `claude46` stays pinned. They do share the same `~/.claude/` auth and config, so logging in for one logs in for both.
+
+### How do I switch back to the latest Claude Code?
+
+Just run `claude` as usual, or uninstall `claude46` with the two `rm` commands in the [Uninstall](#uninstall) section.
 
 ## Maintenance
 
