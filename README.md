@@ -10,7 +10,7 @@ This project is not affiliated with Anthropic. Claude and Claude Code are Anthro
 
 It is intended for users who want to keep running Claude Opus 4.6 after Opus 4.7 became the default, while leaving the regular `claude` command free to auto-update.
 
-The script installs:
+On macOS/Linux, the script installs:
 
 - Claude Code `2.1.110`
 - Launcher command: `claude46`
@@ -18,7 +18,9 @@ The script installs:
 - Binary path: `~/.local/share/claude46/claude-2.1.110`
 - Launcher path: `~/.local/bin/claude46`
 
-The launcher sets `DISABLE_AUTOUPDATER=1`, so `claude46` stays pinned. Your normal `claude` command is not modified.
+(Native Windows install layout is described in the [Windows](#windows) section.)
+
+The launcher sets `DISABLE_AUTOUPDATER=1` and `DISABLE_UPDATES=1`, so `claude46` stays pinned (background auto-updates blocked, and an explicit `claude46 update` is a no-op). Your normal `claude` command is not modified.
 
 ## Install claude46 to Keep Using Claude Opus 4.6
 
@@ -104,7 +106,9 @@ This replaces the pinned binary and launcher at the same paths.
 
 ## Uninstall
 
-Remove the pinned binary and launcher:
+Remove the pinned binary and launcher.
+
+macOS / Linux / WSL:
 
 ```bash
 rm -f "$HOME/.local/bin/claude46"
@@ -117,12 +121,81 @@ Optionally remove this line from `~/.zshrc` if you no longer need it:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+Native Windows:
+
+```powershell
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\claude46"
+```
+
+Optionally remove `%LOCALAPPDATA%\claude46\bin` from your user PATH via System Properties → Environment Variables.
+
 ## Requirements
 
-- macOS or Linux
+- macOS or Linux (including WSL)
 - `curl`
 - `bash`
 - `~/.local/bin` on your `PATH`
+
+For native Windows, see [Windows](#windows) below.
+
+## Windows
+
+`install-claude46.sh` does not run on native Windows. Use one of these paths:
+
+### Inside WSL (recommended)
+
+Open a WSL shell and follow the bash install steps in [Install](#install-claude46-to-keep-using-claude-opus-46) / [Local Install](#local-install) above. The bash script identifies WSL as Linux, and `claude46` will be available from your WSL terminals.
+
+### Native Windows: `install-claude46.ps1`
+
+The PowerShell installer pins `@anthropic-ai/claude-code@2.1.110` via npm into an isolated prefix at `%LOCALAPPDATA%\claude46\`, writes a `claude46.cmd` wrapper that sets `DISABLE_AUTOUPDATER=1`, `DISABLE_UPDATES=1`, and `ANTHROPIC_MODEL=claude-opus-4-6[1m]`, and adds `%LOCALAPPDATA%\claude46\bin` to your user PATH. No admin rights needed. Your global `claude` (if any) is untouched.
+
+Prerequisites:
+
+- Node.js 18+ and npm
+- Git for Windows (Claude Code requires Git Bash on native Windows; set `CLAUDE_CODE_GIT_BASH_PATH` if Git is installed in a nonstandard location)
+
+Quick install from PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/v0.2.0/install-claude46.ps1 | iex
+```
+
+Or from `cmd.exe`:
+
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sparklingneuronics/claude-code-helpers/v0.2.0/install-claude46.ps1 | iex"
+```
+
+To run the latest from `main` instead, replace `v0.2.0` with `main` in the URL.
+
+Local install from a cloned repo:
+
+```cmd
+install-claude46.cmd
+```
+
+Open a new terminal after install, then run `claude46`.
+
+### Without installing (ad-hoc via npx)
+
+For a one-off pinned Opus 4.6 session without installing anything globally, from PowerShell:
+
+```powershell
+$env:DISABLE_AUTOUPDATER="1"
+$env:DISABLE_UPDATES="1"
+$env:ANTHROPIC_MODEL="claude-opus-4-6[1m]"
+npx --yes --package=@anthropic-ai/claude-code@2.1.110 claude
+```
+
+From `cmd.exe`:
+
+```cmd
+set "DISABLE_AUTOUPDATER=1"
+set "DISABLE_UPDATES=1"
+set "ANTHROPIC_MODEL=claude-opus-4-6[1m]"
+npx --yes --package=@anthropic-ai/claude-code@2.1.110 claude
+```
 
 ## FAQ
 
@@ -140,11 +213,11 @@ The launcher sets the default model ID to `claude-opus-4-6[1m]`, which requests 
 
 ### Will this break my normal `claude` install?
 
-No. `claude46` does not replace your normal `claude` binary — they live at different paths, `claude` keeps updating, and `claude46` stays pinned. They do share the same `~/.claude/` auth and config, so logging in for one logs in for both.
+No. `claude46` does not replace your normal `claude` binary — they live at different paths, `claude` keeps updating, and `claude46` stays pinned. They do share Claude Code's per-user auth/config directory (`~/.claude/` on macOS/Linux/WSL, `%USERPROFILE%\.claude\` on native Windows), so logging in for one logs in for both.
 
 ### How do I switch back to the latest Claude Code?
 
-Just run `claude` as usual, or uninstall `claude46` with the two `rm` commands in the [Uninstall](#uninstall) section.
+Just run `claude` as usual, or follow the commands in the [Uninstall](#uninstall) section for your platform.
 
 ## Maintenance
 

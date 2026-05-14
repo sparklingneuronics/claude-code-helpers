@@ -44,6 +44,7 @@ chmod +x "$INSTALL_DIR/claude-$VERSION"
 cat > "$BIN_DIR/claude46" <<EOF
 #!/usr/bin/env bash
 export DISABLE_AUTOUPDATER=1
+export DISABLE_UPDATES=1
 export ANTHROPIC_MODEL='$MODEL'
 exec "$INSTALL_DIR/claude-$VERSION" "\$@"
 EOF
