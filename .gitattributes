@@ -1,0 +1,2 @@
+# Exclude CI workflows from GitHub language stats
+.github/** linguist-generated
