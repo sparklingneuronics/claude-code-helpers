@@ -3,8 +3,19 @@ name: windows-installer-test
 on:
   workflow_dispatch:
   push:
-    branches:
-      - windows-installer-test
+    branches: [main]
+    paths:
+      - 'install-claude46.sh'
+      - 'install-claude46.ps1'
+      - 'install-claude46.cmd'
+      - '.github/workflows/windows-installer.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'install-claude46.sh'
+      - 'install-claude46.ps1'
+      - 'install-claude46.cmd'
+      - '.github/workflows/windows-installer.yml'
 
 jobs:
   smoke:
