@@ -1,0 +1,104 @@
+name: windows-installer-test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'install-claude46.sh'
+      - 'install-claude46.ps1'
+      - 'install-claude46.cmd'
+      - '.github/workflows/windows-installer.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'install-claude46.sh'
+      - 'install-claude46.ps1'
+      - 'install-claude46.cmd'
+      - '.github/workflows/windows-installer.yml'
+
+jobs:
+  smoke:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Show preinstalled tooling
+        run: |
+          node --version
+          npm --version
+          git --version
+          $PSVersionTable.PSVersion
+
+      - name: Run install-claude46.ps1
+        run: |
+          npm config set fetch-retries 3
+          ./install-claude46.ps1
+
+      - name: Verify wrapper file exists and runs via direct path
+        run: |
+          $bin = Join-Path $env:LOCALAPPDATA 'claude46\bin'
+          $exe = Join-Path $bin 'claude46.cmd'
+          if (-not (Test-Path $exe)) { throw "Wrapper missing: $exe" }
+          & $exe --version
+          if ($LASTEXITCODE -ne 0) { throw "claude46.cmd --version exit $LASTEXITCODE" }
+
+      - name: Inspect generated wrapper content
+        run: |
+          $exe = Join-Path $env:LOCALAPPDATA 'claude46\bin\claude46.cmd'
+          Write-Host "--- $exe ---"
+          Get-Content $exe
+
+      - name: Assert wrapper sets expected env vars
+        run: |
+          $exe = Join-Path $env:LOCALAPPDATA 'claude46\bin\claude46.cmd'
+          $content = Get-Content $exe -Raw
+          $needles = @(
+            'set "DISABLE_AUTOUPDATER=1"',
+            'set "DISABLE_UPDATES=1"',
+            'set "ANTHROPIC_MODEL=claude-opus-4-6[1m]"'
+          )
+          foreach ($needle in $needles) {
+            $pattern = [regex]::Escape($needle)
+            if ($content -notmatch $pattern) {
+              throw "Wrapper missing expected line: $needle"
+            }
+          }
+
+      - name: Verify HKCU user PATH was updated
+        run: |
+          $bin = Join-Path $env:LOCALAPPDATA 'claude46\bin'
+          $userPath = [Environment]::GetEnvironmentVariable('Path','User')
+          if (-not $userPath) { throw "User PATH is empty/null after install" }
+          $found = $false
+          foreach ($entry in $userPath.Split(';', [System.StringSplitOptions]::RemoveEmptyEntries)) {
+            $expanded = [Environment]::ExpandEnvironmentVariables($entry).TrimEnd('\')
+            if ([string]::Equals($expanded, $bin.TrimEnd('\'), [StringComparison]::OrdinalIgnoreCase)) {
+              $found = $true
+              break
+            }
+          }
+          if (-not $found) { throw "BinDir not on user PATH after install: expected $bin" }
+
+      - name: Expose claude46 on PATH for subsequent steps
+        run: |
+          $bin = Join-Path $env:LOCALAPPDATA 'claude46\bin'
+          $bin | Out-File -Append -FilePath $env:GITHUB_PATH
+
+      - name: Resolve claude46 via PATHEXT (no .cmd suffix)
+        run: claude46 --version
+
+      - name: Test claude46.cmd from cmd.exe
+        shell: cmd
+        run: |
+          "%LOCALAPPDATA%\claude46\bin\claude46.cmd" --version
+
+      - name: Re-run installer (idempotency)
+        run: ./install-claude46.ps1
+
+      - name: Test install-claude46.cmd shim entrypoint
+        shell: cmd
+        run: install-claude46.cmd
