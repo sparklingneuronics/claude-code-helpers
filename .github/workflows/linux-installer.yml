@@ -1,0 +1,77 @@
+name: linux-installer-test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'install-claude46.sh'
+      - '.github/workflows/linux-installer.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'install-claude46.sh'
+      - '.github/workflows/linux-installer.yml'
+
+jobs:
+  smoke:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Show preinstalled tooling
+        run: |
+          uname -ms
+          node --version
+          npm --version
+          git --version
+
+      - name: Run install-claude46.sh
+        run: ./install-claude46.sh
+
+      - name: Verify wrapper file exists and runs via direct path
+        run: |
+          wrapper="$HOME/.local/bin/claude46"
+          if [ ! -f "$wrapper" ]; then
+            echo "Wrapper missing: $wrapper" >&2
+            exit 1
+          fi
+          "$wrapper" --version
+
+      - name: Inspect generated wrapper content
+        run: cat "$HOME/.local/bin/claude46"
+
+      - name: Assert wrapper sets expected env vars
+        run: |
+          wrapper="$HOME/.local/bin/claude46"
+          for needle in \
+            'DISABLE_AUTOUPDATER=1' \
+            'DISABLE_UPDATES=1' \
+            "ANTHROPIC_MODEL='claude-opus-4-6[1m]'"; do
+            if ! grep -qF "$needle" "$wrapper"; then
+              echo "Wrapper missing expected line: $needle" >&2
+              exit 1
+            fi
+          done
+
+      - name: Expose claude46 on PATH for subsequent steps
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve claude46 via PATH
+        run: claude46 --version
+
+      - name: Re-run installer (idempotency)
+        run: ./install-claude46.sh
+
+      - name: Verify .zshrc PATH append (script targets zsh only)
+        run: |
+          if [ -f "$HOME/.zshrc" ]; then
+            grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.zshrc" \
+              && echo ".zshrc PATH entry present" \
+              || { echo ".zshrc exists but PATH entry missing" >&2; exit 1; }
+          else
+            echo "Note: ~/.zshrc does not exist (expected on bash-default Linux)"
+          fi
