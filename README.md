@@ -6,6 +6,8 @@ Install a pinned Claude Code launcher named `claude46` to keep using **Claude Op
 
 This project is not affiliated with Anthropic. Claude and Claude Code are Anthropic products/trademarks. This repository only provides helper scripts for installing and launching Claude Code.
 
+Published by [Sparkling Neuronics](https://sparklingneuronics.com) · [GitHub](https://github.com/sparklingneuronics)
+
 ## Pin Claude Code to Opus 4.6 with `claude46`
 
 `install-claude46.sh` installs a pinned Claude Code launcher named `claude46`.
