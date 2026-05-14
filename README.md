@@ -2,6 +2,8 @@
 
 Install a pinned Claude Code launcher named `claude46` to keep using **Claude Opus 4.6** (`claude-opus-4-6[1m]`) after Claude Code updated its default to Opus 4.7. Your regular `claude` command continues to auto-update normally.
 
+![claude vs claude46 side by side](assets/terminal-screenshot.png)
+
 This project is not affiliated with Anthropic. Claude and Claude Code are Anthropic products/trademarks. This repository only provides helper scripts for installing and launching Claude Code.
 
 ## Pin Claude Code to Opus 4.6 with `claude46`
